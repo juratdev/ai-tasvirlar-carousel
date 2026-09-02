@@ -1,0 +1,96 @@
+name: render-carousel
+
+# Cloudflare Worker repository_dispatch orqali chaqiradi.
+# client_payload = post JSON (preset, slides, slug)
+on:
+  repository_dispatch:
+    types: [render]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: render
+  cancel-in-progress: false
+
+jobs:
+  render:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Bog'liqliklarni o'rnatish
+        run: |
+          npm install --no-audit --no-fund
+          npx playwright install --with-deps chromium
+
+      - name: Post JSON'ni tayyorlash
+        env:
+          POST: ${{ toJson(github.event.client_payload) }}
+        run: |
+          mkdir -p content
+          if [ "${{ github.event_name }}" = "repository_dispatch" ]; then
+            printf '%s' "$POST" > content/post.json
+          else
+            # Qo'lda ishga tushirilganda namuna post bilan sinaymiz
+            echo "Qo'lda ishga tushirildi — content/sample.json ishlatilmoqda"
+            cp content/sample.json content/post.json
+          fi
+          node -e "const p=require('./content/post.json'); if(!p.slug||!Array.isArray(p.slides)) throw new Error('post JSON yaroqsiz')"
+
+      - name: Slaydlarni render qilish
+        run: |
+          SLUG=$(node -p "require('./content/post.json').slug")
+          echo "SLUG=$SLUG" >> $GITHUB_ENV
+          node src/render.mjs content/post.json "docs/p/$SLUG"
+          rm -f "docs/p/$SLUG/_preview.html"
+
+      - name: Commit va push
+        run: |
+          git config user.name  "carousel-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add docs
+          git commit -m "render: $SLUG" || exit 0
+          git push
+
+      - name: Rasmlar ochiq bo'lishini kutish
+        id: wait
+        run: |
+          BASE="https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/p/$SLUG"
+          echo "base=$BASE" >> $GITHUB_OUTPUT
+          for i in $(seq 1 60); do
+            CODE=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/01.jpg")
+            [ "$CODE" = "200" ] && echo "tayyor ($i-urinish)" && exit 0
+            sleep 10
+          done
+          echo "GitHub Pages 600 soniyada tarqatmadi — Settings > Pages sozlamasini tekshiring" && exit 1
+
+      - name: Worker'ga qaytarish
+        if: github.event_name == 'repository_dispatch'
+        run: |
+          COUNT=$(ls docs/p/$SLUG/*.jpg | wc -l)
+          URLS=$(node -e "
+            const n=+process.argv[1], b=process.argv[2];
+            console.log(JSON.stringify(Array.from({length:n},(_,i)=>
+              b+'/'+String(i+1).padStart(2,'0')+'.jpg')));
+          " "$COUNT" "${{ steps.wait.outputs.base }}")
+          echo "Rasmlar: $URLS"
+          curl -sS -X POST "${{ secrets.WORKER_CALLBACK_URL }}" \
+            -H "content-type: application/json" \
+            -H "x-callback-secret: ${{ secrets.CALLBACK_SECRET }}" \
+            -d "{\"slug\":\"$SLUG\",\"images\":$URLS}"
+
+      - name: Natija
+        run: |
+          echo "### Render tayyor" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Slaydlar: $(ls docs/p/$SLUG/*.jpg | wc -l) ta" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          for f in docs/p/$SLUG/*.jpg; do
+            echo "- ${{ steps.wait.outputs.base }}/$(basename $f)" >> $GITHUB_STEP_SUMMARY
+          done

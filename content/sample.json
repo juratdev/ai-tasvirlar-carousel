@@ -1,0 +1,51 @@
+{
+  "slug": "prompt-4-qoida",
+  "preset": "mono",
+  "source": "evergreen / prompt engineering",
+  "caption": "AI rasmingiz tasavvuringizga o'xshamayaptimi? Muammo modelda emas — promptda.\n\nBu 4 ta qoida natijani darhol o'zgartiradi. Saqlab qo'ying, keyingi generatsiyada sinab ko'ring.\n\nNeyrofotosessiya, AI video va eski rasmlarni tiklash — buyurtma uchun Direct.\n\n#aitasvirlar #suniyintellekt #neyrofotosessiya #aiuzbekistan #promptengineering #aiart #midjourney #uzbekistan",
+  "slides": [
+    {
+      "type": "cover",
+      "badge": "PROMPT",
+      "title": "AI rasmingiz nega o'xshamayapti?",
+      "subtitle": "4 ta qoida — natijani darhol o'zgartiradi",
+      "cta": "4 TA QOIDA • SURING"
+    },
+    {
+      "type": "step",
+      "n": "1",
+      "title": "Sub'ektni aniqlang",
+      "before": { "label": "OLDIN", "text": "chiroyli portret, professional" },
+      "after": { "label": "KEYIN", "text": "35 yoshli erkak, yarim profil, ko'zlar kameraga qaragan, ko'krak plani — model taxmin qilmasligi kerak" }
+    },
+    {
+      "type": "step",
+      "n": "2",
+      "title": "Yorug'likni ayting",
+      "before": { "label": "OLDIN", "text": "yaxshi yorug'lik bo'lsin" },
+      "after": { "label": "KEYIN", "text": "chapdan 45 daraja softbox, yumshoq soya, oltin soat yorug'ligi — kadr uslubini aynan yorug'lik belgilaydi" }
+    },
+    {
+      "type": "step",
+      "n": "3",
+      "title": "Kamera tilida yozing",
+      "before": { "label": "OLDIN", "text": "fon xira bo'lsin" },
+      "after": { "label": "KEYIN", "text": "85mm portret linzasi, f/1.8, sayoz chuqurlik — modellar fotografiya atamalarida o'qitilgan" }
+    },
+    {
+      "type": "tip",
+      "n": "4",
+      "title": "Nimani istamasligingizni yozing",
+      "body": "Ko'p generatorlarda salbiy prompt bor. Unga tez-tez uchraydigan xatolarni kiriting.",
+      "note": "Masalan: buzilgan barmoqlar, ortiqcha qo'llar, matn, suv belgisi, plastik teri"
+    },
+    {
+      "type": "cta",
+      "badge": "BUYURTMA",
+      "title": "Neyrofotosessiya va AI tasvirlar",
+      "subtitle": "AI video, eski rasmlarni tiklash — bir joyda",
+      "contact": { "label": "Telegram kanal", "value": "t.me/ai_tasvir", "icon": "→" },
+      "footer": "Buyurtma uchun Direct yozing"
+    }
+  ]
+}
